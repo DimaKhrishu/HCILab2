@@ -1,0 +1,198 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">My App</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="fileMenu" role="button" data-toggle="dropdown">File</a>
+                        <div class="dropdown-menu" aria-labelledby="fileMenu">
+                            <a class="dropdown-item" href="#" onclick="openMessageWindow(event)" id="messageCommand">Message</a>
+                            <a class="dropdown-item" href="#" onclick="toggleCheck(event)">
+                                Check
+                                <input type="checkbox" id="checkToggle" onclick="toggleMessageCommand(event)">
+                            </a>
+                            <a class="dropdown-item" href="#" onclick="exitApplication(event)">Exit</a>
+                        </div>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="sizeMenu" role="button" data-toggle="dropdown">Size</a>
+                        <div class="dropdown-menu" aria-labelledby="sizeMenu">
+                            <a class="dropdown-item" href="#" onclick="setSize('50%')">
+                                <input type="checkbox" id="size50Checkbox"> 50%
+                            </a>
+                            <a class="dropdown-item" href="#" onclick="setSize('75%')">
+                                <input type="checkbox" id="size75Checkbox"> 75%
+                            </a>
+                            <a class="dropdown-item" href="#" onclick="setSize('100%')">
+                                <input type="checkbox" id="size100Checkbox"> 100%
+                            </a>
+                        </div>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="helpMenu" role="button" data-toggle="dropdown">Help</a>
+                        <div class="dropdown-menu" aria-labelledby="helpMenu">
+                            <a class="dropdown-item" href="#" onclick="showAbout(event)">About</a>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        @RenderBody()
+    </div>
+
+    @RenderSection("Scripts", required: false)
+
+    <script>
+        // Message command
+        function openMessageWindow(event) {
+            event.preventDefault(); // Prevent default link behavior
+            var checkToggle = document.getElementById("checkToggle");
+            if (!checkToggle.checked) {
+                window.alert("This is a message.");
+            }
+        }
+
+        // Toggle the Check command
+        function toggleCheck(event) {
+            event.preventDefault(); // Prevent default link behavior
+            var checkToggle = document.getElementById("checkToggle");
+            checkToggle.checked = !checkToggle.checked;
+            toggleMessageCommand(event);
+        }
+
+        // Toggle the Message command
+        function toggleMessageCommand(event) {
+            event.preventDefault(); // Prevent default link behavior
+            var messageCommand = document.getElementById("messageCommand");
+            var checkToggle = document.getElementById("checkToggle");
+            if (checkToggle.checked) {
+                messageCommand.classList.add("disabled");
+            } else {
+                messageCommand.classList.remove("disabled");
+            }
+        }
+
+       // Exit command
+function exitApplication(event) {
+  event.preventDefault(); // Prevent default link behavior
+
+  // Remove event listeners for other commands
+  var messageCommand = document.getElementById("messageCommand");
+  var checkToggle = document.getElementById("checkToggle");
+  messageCommand.removeEventListener("click", openMessageWindow);
+  checkToggle.removeEventListener("click", toggleMessageCommand);
+
+  if (confirm("Are you sure you want to exit?")) {
+    open(location, "_self").close(); // Close the current tab
+  }
+}
+
+
+        // About command
+        function showAbout(event) {
+            event.preventDefault(); // Prevent default link behavior
+            window.alert("Key combinations: Ctrl+M - Message; Ctrl+C - Check; Ctrl+E - Exit; Ctrl+A - About; S key - 75% size");
+        }
+
+        // Set the size of the page
+        function setSize(size) {
+            document.documentElement.style.fontSize = size;
+
+            // Update checkboxes
+            var size50Checkbox = document.getElementById("size50Checkbox");
+            var size75Checkbox = document.getElementById("size75Checkbox");
+            var size100Checkbox = document.getElementById("size100Checkbox");
+
+            size50Checkbox.checked = (size === "50%");
+            size75Checkbox.checked = (size === "75%");
+            size100Checkbox.checked = (size === "100%");
+        }
+
+        // Bind keyboard combinations to commands
+        document.onkeydown = function (e) {
+            // Check if the event target is an input or textarea to avoid conflicts
+            if (e.target.tagName.toLowerCase() === "input" || e.target.tagName.toLowerCase() === "textarea") {
+                return;
+            }
+
+            // Check key combinations
+            if (e.ctrlKey && (e.key === "m" || e.key === "M")) {
+                openMessageWindow(e);
+            } else if (e.ctrlKey && (e.key === "c" || e.key === "C")) {
+                toggleCheck(e);
+            } else if (e.ctrlKey && (e.key === "a" || e.key === "A")) {
+                showAbout(e);
+            } else if (e.ctrlKey && (e.key === "e" || e.key === "E")) {
+                exitApplication(e);
+            } else if (e.key === "d" || e.key === "D") {
+                toggleSizeMenu();
+                addSizeOptions();
+            } else if (e.key === "s" || e.key === "S") {
+                activate75PercentOption();
+            }
+        };
+
+        // Set the 75% option as active and check the checkbox
+        function activate75PercentOption() {
+            var size75Checkbox = document.getElementById("size75Checkbox");
+            size75Checkbox.checked = true;
+            setSize("75%");
+        }
+
+        // Toggle size menu visibility
+        function toggleSizeMenu() {
+            var sizeMenu = document.getElementById("sizeMenu");
+            sizeMenu.classList.toggle("show");
+        }
+
+        // Add size options to the menu
+        function addSizeOptions() {
+            var sizeMenu = document.getElementById("sizeMenu");
+            var dropdownMenu = sizeMenu.nextElementSibling;
+            var sizeOptions = ["50%", "75%", "100%"];
+
+            // Clear previous size options
+            dropdownMenu.innerHTML = "";
+
+            for (var i = 0; i < sizeOptions.length; i++) {
+                var sizeOption = sizeOptions[i];
+                var optionElement = document.createElement("a");
+                optionElement.classList.add("dropdown-item");
+                optionElement.href = "#";
+                optionElement.textContent = sizeOption;
+
+                var sizeCheckbox = document.createElement("input");
+                sizeCheckbox.type = "checkbox";
+                sizeCheckbox.id = "size" + i + "Checkbox";
+                sizeCheckbox.checked = (sizeOption === "75%");
+
+                optionElement.insertBefore(sizeCheckbox, optionElement.firstChild);
+                dropdownMenu.appendChild(optionElement);
+
+                // Set size option click event
+                optionElement.onclick = function (event) {
+                    event.preventDefault();
+                    var size = event.target.textContent.trim();
+                    setSize(size);
+                };
+            }
+        }
+    </script>
+</body>
+</html>
